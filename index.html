@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>quickssh</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="workspace-shell">
+      <header class="module-header panel">
+        <div>
+          <p class="eyebrow">Developer Hub</p>
+          <h1>Developer Hub</h1>
+          <p class="muted module-subtitle">
+            One desktop hub for remote infrastructure and local developer tooling.
+          </p>
+        </div>
+
+        <nav class="module-switcher" aria-label="Application modules">
+          <button
+            id="module-quickssh-trigger"
+            class="module-trigger active"
+            type="button"
+            data-module-target="quickssh"
+          >
+            quickssh
+          </button>
+          <button
+            id="module-devtools-trigger"
+            class="module-trigger"
+            type="button"
+            data-module-target="devtools"
+          >
+            devtools
+          </button>
+        </nav>
+      </header>
+
+      <section id="module-quickssh" class="module-screen">
+        <div class="app-shell">
+          <aside class="host-panel panel">
+            <div class="panel-head">
+              <p class="eyebrow">Workspace</p>
+              <h1>Hosts</h1>
+            </div>
+
+            <div class="host-workspace">
+              <div class="host-stack">
+                <ul id="hosts-list" class="host-list"></ul>
+
+                <section class="sidebar-forwards">
+                  <div class="sidebar-forwards-head">
+                    <h3>Active Forwards</h3>
+                    <span id="forward-count" class="muted">0 forwards</span>
+                  </div>
+
+                  <ul id="forwards-list" class="forward-list sidebar-forward-list">
+                    <li class="forward-empty muted">Select a host to manage forwards.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <form id="host-form" class="host-form">
+                <h2 id="form-title">Add Host</h2>
+
+                <label>
+                  Name
+                  <input id="host-name" name="name" type="text" maxlength="64" required />
+                </label>
+
+                <label>
+                  SSH Target
+                  <input id="host-target" name="sshTarget" type="text" placeholder="user@example.com" maxlength="128" required />
+                </label>
+
+                <label>
+                  Notes
+                  <textarea id="host-notes" name="notes" rows="3" maxlength="256"></textarea>
+                </label>
+
+                <div class="form-actions">
+                  <button id="save-host" type="submit">Save Host</button>
+                  <button id="reset-host" class="ghost" type="button">Clear</button>
+                </div>
+              </form>
+            </div>
+          </aside>
+
+          <main class="content-grid">
+            <section class="panel status-panel">
+              <div>
+                <p class="eyebrow">Active Host</p>
+                <h2 id="active-host-name">No host selected</h2>
+                <p id="active-host-target" class="muted">Add and select a host to inspect containers.</p>
+              </div>
+              <button id="refresh-containers" type="button">Refresh Containers</button>
+            </section>
+
+            <section class="panel containers-panel">
+              <div class="section-head">
+                <h3>Containers</h3>
+                <span id="container-count" class="muted">0 containers</span>
+              </div>
+
+              <div class="container-toolbar">
+                <input
+                  id="container-search"
+                  type="search"
+                  placeholder="Search by container name or port (e.g. 5432)"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Image</th>
+                      <th>Ports</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="containers-body">
+                    <tr>
+                      <td colspan="5" class="muted">Select a host to load containers.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <p id="notice" class="notice" role="status"></p>
+          </main>
+        </div>
+      </section>
+
+      <section id="module-devtools" class="module-screen hidden">
+        <div class="devtools-shell">
+          <aside class="panel devtools-sidebar">
+            <div class="panel-head">
+              <p class="eyebrow">Local Environments</p>
+              <h2>DevTools</h2>
+            </div>
+
+            <ul id="devtools-environments" class="devtools-environment-list"></ul>
+          </aside>
+
+          <main class="devtools-content">
+            <section class="panel devtools-overview">
+              <div>
+                <p class="eyebrow">Selected Stack</p>
+                <h2 id="devtools-title">No environment selected</h2>
+                <p id="devtools-summary" class="muted">
+                  Pick a local stack template to inspect services, commands and runbooks.
+                </p>
+              </div>
+
+              <div class="devtools-actions">
+                <button id="devtools-up" type="button">Copy Up</button>
+                <button id="devtools-down" class="ghost" type="button">Copy Down</button>
+                <button id="devtools-logs" class="ghost" type="button">Copy Logs</button>
+              </div>
+            </section>
+
+            <section class="panel devtools-services-panel">
+              <div class="section-head">
+                <h3>Services</h3>
+                <span id="devtools-service-count" class="muted">0 services</span>
+              </div>
+
+              <div class="container-toolbar">
+                <input
+                  id="devtools-service-search"
+                  type="search"
+                  placeholder="Search by service, role or port"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div id="devtools-services" class="devtools-services-grid"></div>
+            </section>
+
+            <section class="panel devtools-detail-panel">
+              <div class="section-head">
+                <h3 id="devtools-detail-title">Service Runbook</h3>
+                <span id="devtools-detail-meta" class="muted">No service selected</span>
+              </div>
+
+              <div id="devtools-detail" class="devtools-detail"></div>
+            </section>
+
+            <p id="devtools-notice" class="notice" role="status"></p>
+          </main>
+        </div>
+      </section>
+    </div>
+
+    <div id="busy-overlay" class="busy-overlay hidden" aria-live="polite" aria-busy="true">
+      <div class="busy-card" role="status">
+        <span class="busy-spinner" aria-hidden="true"></span>
+        <p id="busy-message">Working...</p>
+      </div>
+    </div>
+
+    <div id="logs-modal" class="logs-modal hidden" role="dialog" aria-modal="true" aria-labelledby="logs-title">
+      <div class="logs-backdrop" data-action="close-logs"></div>
+      <section class="logs-card">
+        <header class="logs-header">
+          <div>
+            <p class="eyebrow">Container Logs</p>
+            <h3 id="logs-title">Logs</h3>
+            <p id="logs-subtitle" class="muted"></p>
+          </div>
+          <button id="logs-close" class="ghost" type="button">Close</button>
+        </header>
+
+        <div class="logs-toolbar">
+          <label class="logs-follow-toggle">
+            <input id="logs-follow" type="checkbox" checked />
+            Follow
+          </label>
+          <button id="logs-refresh" class="ghost" type="button">Refresh</button>
+        </div>
+
+        <pre id="logs-output" class="logs-output">No logs loaded.</pre>
+      </section>
+    </div>
+
+    <div
+      id="inspect-modal"
+      class="logs-modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="inspect-title"
+    >
+      <div class="logs-backdrop" data-action="close-inspect"></div>
+      <section class="logs-card inspect-card">
+        <header class="logs-header">
+          <div>
+            <p class="eyebrow">Container Inspect</p>
+            <h3 id="inspect-title">Inspect Details</h3>
+            <p id="inspect-subtitle" class="muted"></p>
+          </div>
+          <button id="inspect-close" class="ghost" type="button">Close</button>
+        </header>
+
+        <div class="inspect-toolbar">
+          <input
+            id="inspect-search"
+            type="search"
+            placeholder="Find in inspect JSON..."
+            autocomplete="off"
+          />
+          <span id="inspect-search-count" class="muted">0 matches</span>
+          <button id="inspect-search-prev" class="ghost" type="button">Prev</button>
+          <button id="inspect-search-next" class="ghost" type="button">Next</button>
+        </div>
+
+        <pre id="inspect-output" class="logs-output inspect-output">No details loaded.</pre>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
